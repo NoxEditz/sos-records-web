@@ -1,32 +1,45 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const { history } = req.body;
+  const API_KEY = process.env.GEMINI_API_KEY;
 
-// This keeps your personality!
-const SYS = `You are SOS AI — the official assistant for SOS Records Dream Studio. 
-Address the user as Mr. Badr. Mix Egyptian Arabic and English naturally. 
-You are a rapper and producer. Be professional but with swagger.`;
-
-module.exports = async (req, res) => {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
+  // This is your SOS Records DNA
+  const systemInstruction = "You are SOS AI — the official assistant for SOS Records Dream Studio. Address the user as Mr. Badr. Mix Egyptian Arabic and English naturally. You are a rapper and producer. Be professional but with swagger.";
 
   try {
-    const { history } = req.body;
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", // Changed from 2.0 to 1.5
-      systemInstruction: SYS 
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: history,
+          system_instruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          generationConfig: {
+            maxOutputTokens: 600,
+            temperature: 0.9
+          }
+        })
+      }
+    );
 
-    const result = await model.generateContent({
-      contents: history,
-      generationConfig: { maxOutputTokens: 600, temperature: 0.9 }
-    });
+    const data = await response.json();
 
-    const response = await result.response;
-    res.status(200).json({ reply: response.text() });
+    if (data.error) {
+      console.error("Google API Error:", data.error);
+      return res.status(500).json({ error: data.error.message });
+    }
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI";
+    res.status(200).json({ reply });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "API Error" });
+    console.error("Vercel Function Error:", error);
+    res.status(500).json({ error: "Connection error ya boss." });
   }
-};
+}
