@@ -1,12 +1,13 @@
 export default async function handler(req, res) {
-  // 1. Only allow POST
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
   const { history } = req.body;
   const API_KEY = process.env.GEMINI_API_KEY;
 
-  // 2. The most stable URL for your region
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+  // UPDATED: Using the brand new Gemini 3 Flash model string
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;
+
+  const SYS_PROMPT = "You are SOS AI — the official assistant for SOS Records Dream Studio. Address the user as Mr. Badr. Mix Egyptian Arabic and English naturally. You are a rapper and producer. Be professional but with swagger.";
 
   try {
     const response = await fetch(url, {
@@ -15,23 +16,26 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: history,
         system_instruction: { 
-          parts: [{ text: "You are SOS AI from SOS Records. Rap/Producer persona. Address user as Mr. Badr." }] 
+          parts: [{ text: SYS_PROMPT }] 
+        },
+        generationConfig: { 
+          maxOutputTokens: 800, 
+          temperature: 0.9 
         }
       })
     });
 
     const data = await response.json();
 
-    // 3. Handle Google Errors specifically
     if (data.error) {
-      return res.status(200).json({ reply: "Google says: " + data.error.message });
+      // This will now tell us if Gemini 3 is active or if there's a different issue
+      return res.status(200).json({ reply: "System update: " + data.error.message });
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm here, but I have no words. Try again!";
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm listening, Mr. Badr. Go ahead.";
     res.status(200).json({ reply });
 
   } catch (error) {
-    // 4. If this runs, it's a Vercel/Network issue
-    res.status(200).json({ reply: "Vercel Connection issue. Please check your API Key in Settings." });
+    res.status(200).json({ reply: "Connection glitch. Let's try that again, boss." });
   }
 }
