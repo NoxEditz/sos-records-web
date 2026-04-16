@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   try {
     const { history } = req.body;
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash", 
+      model: "gemini-1.5-flash", // Changed from 2.0 to 1.5
       systemInstruction: SYS 
     });
 
