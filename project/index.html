@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SOS Studio">
+  <title>SOS RECORDS — DREAM STUDIO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    :root {
+      --bg:#070205; --surface:rgba(23,10,17,.88); --surface2:rgba(28,11,20,.97);
+      --border:rgba(255,92,128,.15); --border-hi:rgba(255,92,128,.3);
+      --text:#fff1f4; --muted:#c89aa7; --accent:#ff3060; --accent2:#ff6080;
+      --accent-glow:rgba(255,48,96,.28); --r:22px; --r-sm:16px;
+      --shadow:0 20px 60px rgba(0,0,0,.45);
+      --font-d:'Syne',sans-serif; --font-m:'JetBrains Mono',monospace; --font-b:'Manrope',sans-serif;
+    }
+    body.light {
+      --bg:#fff4f7; --surface:rgba(255,234,240,.88); --surface2:rgba(255,218,228,.95);
+      --border:rgba(220,50,80,.18); --border-hi:rgba(220,50,80,.35);
+      --text:#250410; --muted:#8a3a50; --accent:#d41535; --accent-glow:rgba(212,21,53,.14);
+      --shadow:0 10px 28px rgba(220,50,80,.1);
+    }
+    body.light::after { opacity:.12; }
+    body.light .sec-amt { color:var(--accent); }
+    body.light .item-price { color:var(--accent); background:rgba(212,21,53,.07); border-color:rgba(212,21,53,.14); }
+    body.light .chk.on { color:#fff; }
+    body.light .prog-pct { color:var(--text); font-weight:700; }
+    body.light .item-name a { color:var(--text); }
+
+    html { scroll-behavior:smooth; }
+
+    body {
+      background:var(--bg); color:var(--text); font-family:var(--font-b);
+      line-height:1.5; min-height:100vh; overflow-x:hidden;
+      transition:background .4s,color .4s; -webkit-font-smoothing:antialiased;
+    }
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:80px 80px;
+      mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 80%);
+      opacity:.2;
+    }
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(255,48,96,.18),transparent);
+      opacity:.8;
+    }
+    a { color:inherit; text-decoration:none; }
+
+    /* ───────────────────────────────────────────────
+       LOCKSCREEN
+    ─────────────────────────────────────────────── */
+    #lockscreen {
+      position:fixed; inset:0; z-index:9999;
+      background:linear-gradient(160deg,#0d0308 0%,#060104 60%,#0a0206 100%);
+      display:flex; align-items:center; justify-content:center;
+      padding:20px; overflow:hidden;
+      transition:opacity .75s cubic-bezier(.4,0,.2,1);
+    }
+    #lockscreen.out { opacity:0; pointer-events:none; }
+    #lockscreen::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle at 50% 40%,rgba(255,48,96,.14),transparent 60%);
+      animation:ls-pulse 4s ease-in-out infinite;
+    }
+    @keyframes ls-pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+    .lock-card {
+      position:relative; z-index:1; max-width:400px; width:100%;
+      background:rgba(16,5,11,.92);
+      border:1px solid rgba(255,48,96,.22);
+      border-radius:36px; padding:38px 26px 42px; text-align:center;
+      box-shadow:0 50px 100px rgba(0,0,0,.8), 0 0 0 1px rgba(255,42,77,.1),
+        inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter:blur(40px) saturate(1.2);
+    }
+    .lock-mark {
+      width:76px; height:76px; border-radius:26px; margin:0 auto 20px;
+      background:linear-gradient(145deg,#ff7090,#ff1040);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-d); font-size:34px; font-weight:800; color:#fff;
+      box-shadow:0 20px 40px rgba(255,48,96,.4), 0 0 0 8px rgba(255,48,96,.08);
+      animation:mark-breathe 3s ease-in-out infinite;
+    }
+    @keyframes mark-breathe {
+      0%,100%{box-shadow:0 20px 40px rgba(255,48,96,.4),0 0 0 8px rgba(255,48,96,.08)}
+      50%{box-shadow:0 24px 48px rgba(255,48,96,.55),0 0 0 14px rgba(255,48,96,.06)}
+    }
+    .lock-title {
+      font-family:var(--font-d); font-size:2rem; font-weight:800; letter-spacing:-.02em;
+      background:linear-gradient(135deg,#fff5f7 30%,#ff3060);
+      -webkit-background-clip:text; color:transparent; margin-bottom:4px;
+    }
+    .lock-sub {
+      font-family:var(--font-m); font-size:.72rem; letter-spacing:3px;
+      color:var(--accent); text-transform:uppercase; margin-bottom:6px;
+    }
+    .lock-hi {
+      font-size:.88rem; color:var(--muted); margin-bottom:28px;
+    }
+
+    /* Phase transitions */
+    .lock-phase { transition:opacity .35s,transform .35s; }
+    .lock-phase.hidden { display:none; }
+
+    /* ── SLIDE ── */
+    .slide-track {
+      height:70px; border-radius:70px;
+      background:rgba(6,2,4,.85);
+      border:1px solid rgba(255,42,77,.2);
+      position:relative; cursor:grab; user-select:none; touch-action:none;
+      overflow:hidden;
+    }
+    .slide-track:active { cursor:grabbing; }
+    .slide-fill {
+      position:absolute; inset:0; right:auto; width:0%;
+      background:linear-gradient(90deg,rgba(255,48,96,.18),rgba(255,48,96,.04));
+      border-radius:70px; pointer-events:none; transition:width .03s linear;
+    }
+    .slide-knob {
+      position:absolute; left:5px; top:5px; width:60px; height:60px;
+      border-radius:50%; background:linear-gradient(145deg,#ff7090,#ff1040);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; color:#fff; font-weight:700;
+      box-shadow:0 6px 20px rgba(255,48,96,.55); z-index:2;
+      will-change:left; transition:box-shadow .2s;
+    }
+    .slide-knob:active { box-shadow:0 10px 30px rgba(255,48,96,.75); }
+    .slide-label {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-m); font-size:.74rem; letter-spacing:3px; color:rgba(200,154,167,.6);
+      pointer-events:none; text-transform:uppercase; padding-left:75px;
+    }
+
+    /* ── PIN ── */
+    #phase2 { animation:phase-in .38s cubic-bezier(.4,0,.2,1); }
+    @keyframes phase-in { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    .pin-prompt {
+      font-family:var(--font-m); font-size:.72rem; letter-spacing:3px;
+      color:var(--muted); text-transform:uppercase; margin-bottom:24px; margin-top:4px;
+    }
+    .pin-dots {
+      display:flex; justify-content:center; gap:18px; margin-bottom:28px;
+    }
+    .pin-dot {
+      width:20px; height:20px; border-radius:50%;
+      border:2px solid rgba(255,48,96,.35); background:transparent;
+      transition:all .25s cubic-bezier(.4,0,.2,1);
+    }
+    .pin-dot.on {
+      background:var(--accent); border-color:var(--accent);
+      box-shadow:0 0 14px rgba(255,48,96,.65);
+      transform:scale(1.18);
+    }
+    .pin-dot.err { border-color:#ff4444; background:rgba(255,68,68,.25); }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 16%{transform:translateX(-8px)}
+      33%{transform:translateX(8px)} 50%{transform:translateX(-6px)}
+      66%{transform:translateX(6px)} 83%{transform:translateX(-3px)}
+    }
+    .pin-dots.shake { animation:shake .4s ease; }
+
+    .numpad {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+      max-width:270px; margin:0 auto;
+    }
+    .np {
+      height:62px; background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,92,128,.1); border-radius:16px;
+      color:var(--text); font-family:var(--font-d); font-size:1.35rem; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background .15s,transform .1s,border-color .15s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .np:active, .np.tap {
+      background:rgba(255,48,96,.22); border-color:rgba(255,48,96,.4);
+      transform:scale(.93);
+    }
+    .np.del { font-size:1.1rem; color:var(--muted); }
+    .np.ghost { visibility:hidden; }
+
+    /* ── UNLOCK BURST ── */
+    @keyframes burst {
+      0%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.6)}
+    }
+    .lock-card.unlocking { animation:burst .5s ease forwards; }
+
+    /* ───────────────────────────────────────────────
+       MAIN APP
+    ─────────────────────────────────────────────── */
+    .app {
+      position:relative; z-index:1; max-width:1160px; margin:0 auto;
+      padding:26px 18px 96px;
+    }
+
+    /* NAV */
+    .nav {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      gap:12px; margin-bottom:28px; padding:13px 16px;
+      border-radius:22px; border:1px solid var(--border);
+      background:var(--surface); backdrop-filter:blur(20px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04),var(--shadow);
+    }
+    .logo { display:flex; align-items:center; gap:12px; font-family:var(--font-d); font-size:clamp(.95rem,2vw,1.3rem); font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+    .logo-mark { width:40px; height:40px; border-radius:13px; background:linear-gradient(135deg,#ff6f8f,#ff1f50); display:flex; align-items:center; justify-content:center; color:#fff; font-size:19px; font-weight:800; box-shadow:0 10px 24px rgba(255,48,96,.3); flex-shrink:0; }
+    .nav-btns { display:flex; gap:7px; flex-wrap:wrap; }
+    .btn { font-family:var(--font-b); font-size:.78rem; font-weight:700; padding:9px 15px; border-radius:12px; border:1px solid var(--border-hi); background:var(--surface2); color:var(--muted); cursor:pointer; transition:all .2s; backdrop-filter:blur(12px); white-space:nowrap; }
+    .btn:hover { border-color:var(--accent); color:var(--text); transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.2); }
+    .btn.on { border-color:transparent; background:linear-gradient(135deg,#ff6d8d,#ff1f50); color:#18070e; box-shadow:0 8px 22px rgba(255,48,96,.32); }
+
+    /* STATS */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; margin-bottom:20px; }
+    .stat { padding:19px 17px 15px; border-radius:20px; background:var(--surface); border:1px solid var(--border); position:relative; overflow:hidden; box-shadow:var(--shadow); transition:transform .22s,border-color .22s; }
+    .stat:hover { transform:translateY(-3px); border-color:rgba(255,48,96,.35); }
+    .stat::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--c,var(--accent)),transparent); }
+    .stat-lbl { font-size:.68rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+    .stat-val { display:flex; align-items:baseline; gap:7px; margin-top:11px; font-family:var(--font-m); font-size:clamp(1.15rem,2vw,1.75rem); font-weight:700; }
+    .stat-val em { font-style:normal; font-size:.65rem; color:var(--muted); }
+    .stat-sub { margin-top:7px; font-size:.73rem; color:var(--muted); }
+
+    /* PROGRESS */
+    .prog-wrap { margin-bottom:20px; padding:18px 20px; border-radius:20px; background:var(--surface); border:1px solid var(--border); backdrop-filter:blur(16px); }
+    .prog-head { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:9px; }
+    .prog-lbl { font-size:.68rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+    .prog-pct { font-family:var(--font-m); font-size:.76rem; color:#ffd0da; }
+    .prog-bar { height:10px; background:rgba(120,120,120,.12); border-radius:99px; overflow:hidden; display:flex; box-shadow:inset 0 1px 3px rgba(0,0,0,.4); }
+    .prog-seg { height:100%; transition:width .75s cubic-bezier(.2,.9,.4,1.1); position:relative; }
+    .prog-seg::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(255,255,255,.22),transparent 40%,transparent 60%,rgba(255,255,255,.12)); }
+
+    /* SEARCH */
+    .search-wrap { position:relative; margin-bottom:12px; }
+    .search-wrap input { width:100%; height:54px; padding:0 50px; border-radius:15px; border:1px solid var(--border-hi); background:var(--surface); color:var(--text); font-family:var(--font-b); font-size:.95rem; outline:none; backdrop-filter:blur(12px); transition:all .2s; }
+    .search-wrap input::placeholder { color:var(--muted); }
+    .search-wrap input:focus { box-shadow:0 0 0 3px rgba(255,48,96,.1); border-color:var(--accent); }
+    .si,.sc { position:absolute; top:50%; transform:translateY(-50%); color:var(--muted); }
+    .si { left:17px; font-size:15px; pointer-events:none; }
+    .sc { right:14px; background:none; border:none; cursor:pointer; font-size:13px; padding:6px; display:none; }
+    .sc.show { display:block; }
+    .toolbar { display:flex; justify-content:flex-end; margin-bottom:14px; }
+    .toolbar-r { font-size:.74rem; color:var(--muted); }
+    .toolbar-r b { font-family:var(--font-m); color:var(--accent); }
+
+    /* SECTIONS */
+    .sections { display:flex; flex-direction:column; gap:13px; }
+    .section { background:var(--surface); border:1px solid var(--border); border-radius:20px; overflow:hidden; box-shadow:var(--shadow); transition:transform .22s,border-color .22s; animation:fade-up .35s ease both; }
+    .section:hover { transform:translateY(-2px); border-color:rgba(255,48,96,.28); }
+    @keyframes fade-up { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    .sec-header { width:100%; background:none; border:none; padding:15px 17px; display:grid; grid-template-columns:5px 1fr auto; align-items:center; gap:15px; cursor:pointer; color:var(--text); font-family:var(--font-b); text-align:left; transition:background .2s; }
+    .sec-header:hover { background:rgba(255,42,77,.04); }
+    .sec-bar { width:5px; height:50px; border-radius:999px; flex-shrink:0; }
+    .sec-name { font-size:.98rem; font-weight:800; display:flex; align-items:center; gap:9px; flex-wrap:wrap; letter-spacing:-.01em; }
+    .top-badge { font-size:.6rem; font-weight:800; letter-spacing:.07em; padding:4px 9px; border-radius:999px; text-transform:uppercase; color:#000; }
+    .sec-meta { font-size:.72rem; color:var(--muted); margin-top:4px; }
+    .sec-right { display:flex; align-items:center; gap:14px; text-align:right; }
+    .sec-amt { font-family:var(--font-m); font-size:.9rem; font-weight:700; color:#ffdbe2; }
+    .sec-pct { font-size:.68rem; color:var(--muted); margin-top:2px; }
+    .chev { color:var(--muted); font-size:.76rem; transition:transform .25s; }
+    .section.open .chev { transform:rotate(180deg); }
+    .sec-body { max-height:0; overflow:hidden; transition:max-height .4s cubic-bezier(.4,0,.2,1); }
+    .section.open .sec-body { max-height:1800px; }
+    .sec-body-inner { border-top:1px solid var(--border); }
+
+    /* ITEMS */
+    .item { display:grid; grid-template-columns:26px 1fr auto; align-items:start; gap:13px; padding:12px 17px; border-bottom:1px solid var(--border); transition:background .2s; }
+    .item:last-child { border-bottom:0; }
+    .item:hover { background:rgba(255,42,77,.04); }
+    .item.done { opacity:.52; }
+    .item.done .item-name { text-decoration:line-through; color:var(--muted); }
+    .chk { width:21px; height:21px; border:1.5px solid var(--border-hi); border-radius:7px; background:rgba(255,255,255,.02); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:transparent; transition:all .2s; flex-shrink:0; margin-top:1px; }
+    .chk:hover { border-color:rgba(255,92,128,.4); transform:translateY(-1px); }
+    .chk.on { background:linear-gradient(135deg,#ff6c8c,#ff1f50); border-color:transparent; color:#fff; }
+    .item-name { font-size:.9rem; font-weight:600; line-height:1.45; }
+    .item-name a { border-bottom:1px solid rgba(255,255,255,.07); transition:all .2s; }
+    .item-name a:hover { color:#ff9db1; border-bottom-color:rgba(255,157,177,.5); }
+    .item-note { font-size:.71rem; color:var(--muted); margin-top:4px; line-height:1.4; }
+    .item-price { font-family:var(--font-m); font-size:.78rem; font-weight:700; align-self:center; padding:6px 11px; border-radius:999px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); color:#ffe0e7; white-space:nowrap; }
+
+    mark { background:rgba(255,110,145,.28); color:#fff; border-radius:4px; padding:0 3px; }
+    .no-results { text-align:center; padding:50px 20px; border-radius:18px; background:rgba(15,6,11,.5); border:1px dashed rgba(255,255,255,.07); color:var(--muted); display:none; }
+    .footer { text-align:center; margin-top:48px; font-size:.72rem; color:var(--muted); border-top:1px solid var(--border); padding-top:18px; letter-spacing:.1em; }
+
+    /* ───────────────────────────────────────────────
+       AI CHAT
+    ─────────────────────────────────────────────── */
+    .ai-fab {
+      position:fixed;
+      bottom:max(22px, calc(env(safe-area-inset-bottom, 0px) + 22px));
+      right:18px; z-index:1001;
+      width:58px; height:58px; border-radius:50%; border:none;
+      background:linear-gradient(145deg,#ff6d8d,#ff0f45);
+      color:#fff; font-size:22px;
+      box-shadow:0 8px 28px rgba(255,48,96,.55), 0 0 0 0 rgba(255,48,96,.3);
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:transform .3s,box-shadow .3s;
+      animation:ai-pulse 2.8s ease-in-out infinite;
+    }
+    @keyframes ai-pulse {
+      0%,100%{box-shadow:0 8px 28px rgba(255,48,96,.55),0 0 0 0 rgba(255,48,96,.3)}
+      60%{box-shadow:0 8px 28px rgba(255,48,96,.55),0 0 0 16px rgba(255,48,96,0)}
+    }
+    .ai-fab:hover { transform:scale(1.1); }
+    .ai-fab.active { animation:none; transform:rotate(20deg) scale(1.08); }
+
+    .ai-win {
+      position:fixed; z-index:1000;
+      bottom:max(92px, calc(env(safe-area-inset-bottom, 0px) + 92px));
+      right:14px;
+      width:min(358px, calc(100vw - 28px));
+      height:min(520px, 72vh);
+      background:var(--surface2);
+      border:1px solid rgba(255,48,96,.28);
+      border-radius:28px;
+      box-shadow:0 32px 64px rgba(0,0,0,.65), 0 0 0 1px rgba(255,42,77,.08);
+      display:flex; flex-direction:column; overflow:hidden;
+      transform:translateY(28px) scale(.94);
+      transform-origin:bottom right;
+      opacity:0; pointer-events:none;
+      transition:all .35s cubic-bezier(.4,0,.2,1);
+      backdrop-filter:blur(40px);
+    }
+    .ai-win.open { transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+
+    .ai-head {
+      padding:14px 16px; flex-shrink:0;
+      background:rgba(0,0,0,.2); border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:11px;
+    }
+    .ai-av {
+      width:38px; height:38px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(145deg,#ff6d8d,#ff0f45);
+      display:flex; align-items:center; justify-content:center; font-size:17px;
+      box-shadow:0 4px 14px rgba(255,48,96,.4);
+    }
+    .ai-head-info { flex:1; min-width:0; }
+    .ai-head-name { font-family:var(--font-d); font-weight:800; font-size:.9rem; }
+    .ai-head-status { font-family:var(--font-m); font-size:.64rem; color:var(--accent); letter-spacing:.05em; }
+    .ai-x { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 6px; line-height:1; transition:color .2s; }
+    .ai-x:hover { color:var(--text); }
+
+    .ai-body {
+      flex:1; overflow-y:auto; padding:14px 12px;
+      display:flex; flex-direction:column; gap:10px;
+      scroll-behavior:smooth;
+    }
+    .ai-body::-webkit-scrollbar { width:3px; }
+    .ai-body::-webkit-scrollbar-thumb { background:rgba(255,48,96,.18); border-radius:2px; }
+
+    .ai-msg {
+      max-width:88%; padding:10px 13px; border-radius:18px;
+      font-size:.83rem; line-height:1.52; word-break:break-word;
+    }
+    .ai-msg.bot {
+      background:rgba(255,48,96,.11); border:1px solid rgba(255,48,96,.13);
+      color:var(--text); align-self:flex-start; border-bottom-left-radius:5px;
+    }
+    .ai-msg.user {
+      background:linear-gradient(135deg,#ff6d8d,#ff0f45);
+      color:#fff; align-self:flex-end; border-bottom-right-radius:5px;
+    }
+    .typing { display:flex; gap:5px; align-items:center; padding:12px 14px; align-self:flex-start; }
+    .typing span { width:7px; height:7px; border-radius:50%; background:var(--accent); opacity:.45; animation:ty 1.2s ease-in-out infinite; }
+    .typing span:nth-child(2) { animation-delay:.2s; }
+    .typing span:nth-child(3) { animation-delay:.4s; }
+    @keyframes ty { 0%,60%,100%{transform:translateY(0);opacity:.45} 30%{transform:translateY(-6px);opacity:1} }
+
+    .ai-input-row {
+      display:flex; gap:8px; padding:10px 11px; flex-shrink:0;
+      border-top:1px solid var(--border); background:rgba(0,0,0,.15);
+    }
+    .ai-inp {
+      flex:1; background:rgba(255,255,255,.05); border:1px solid var(--border);
+      border-radius:13px; padding:9px 13px; color:var(--text);
+      font-family:var(--font-b); font-size:.83rem; outline:none; transition:border-color .2s;
+    }
+    .ai-inp:focus { border-color:rgba(255,48,96,.4); }
+    .ai-inp::placeholder { color:var(--muted); }
+    .ai-send {
+      width:40px; height:40px; border:none; border-radius:11px;
+      background:linear-gradient(135deg,#ff6d8d,#ff0f45);
+      color:#fff; font-size:15px; cursor:pointer; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      transition:transform .2s,opacity .2s;
+    }
+    .ai-send:hover { transform:scale(1.07); }
+    .ai-send:disabled { opacity:.35; cursor:not-allowed; transform:none; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){ .stats{grid-template-columns:repeat(2,1fr)} }
+    @media(max-width:640px){
+      .app{padding:14px 12px 88px}
+      .nav{padding:11px 13px;margin-bottom:18px;justify-content:center}
+      .stats{grid-template-columns:1fr;gap:10px}
+      .prog-wrap,.section,.stat{border-radius:16px}
+      .search-wrap input{border-radius:13px;height:50px}
+      .sec-header{grid-template-columns:5px 1fr;padding:13px 15px}
+      .sec-right{grid-column:2;justify-content:space-between;margin-top:5px}
+      .item{grid-template-columns:22px 1fr;gap:11px;padding:11px 15px}
+      .item-price{grid-column:2;justify-self:start;margin-top:5px}
+      .ai-win{
+        bottom:0;right:0;left:0;width:100%;
+        border-radius:24px 24px 0 0;
+        height:76vh;transform:translateY(100%);
+        transform-origin:bottom center;
+      }
+      .ai-win.open{transform:translateY(0);opacity:1}
+      .lock-card{padding:30px 18px 36px;border-radius:28px}
+      .lock-title{font-size:1.75rem}
+      .lock-mark{width:66px;height:66px;border-radius:22px}
+    }
+    @supports(padding:env(safe-area-inset-bottom)){
+      .app{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     LOCKSCREEN — always shown on every page load
+══════════════════════════════════════════════════ -->
+<div id="lockscreen">
+  <div class="lock-card" id="lockCard">
+
+    <!-- PHASE 1: Slide to unlock -->
+    <div id="phase1" class="lock-phase">
+      <div class="lock-mark">S</div>
+      <div class="lock-title">SOS RECORDS</div>
+      <div class="lock-sub">DREAM STUDIO</div>
+      <div class="lock-hi">Welcome back, Mr. Badr 🎤</div>
+      <div class="slide-track" id="slideTrack">
+        <div class="slide-fill" id="slideFill"></div>
+        <div class="slide-knob" id="slideKnob">→</div>
+        <div class="slide-label" id="slideLabel">SLIDE TO UNLOCK</div>
+      </div>
+    </div>
+
+    <!-- PHASE 2: PIN entry -->
+    <div id="phase2" class="lock-phase hidden">
+      <div class="lock-mark" style="font-size:28px">🔐</div>
+      <div class="lock-title" style="font-size:1.5rem">Enter PIN</div>
+      <div class="pin-prompt">4-DIGIT ACCESS CODE</div>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="numpad" id="numpad">
+        <button class="np" data-d="1">1</button>
+        <button class="np" data-d="2">2</button>
+        <button class="np" data-d="3">3</button>
+        <button class="np" data-d="4">4</button>
+        <button class="np" data-d="5">5</button>
+        <button class="np" data-d="6">6</button>
+        <button class="np" data-d="7">7</button>
+        <button class="np" data-d="8">8</button>
+        <button class="np" data-d="9">9</button>
+        <div class="np ghost"></div>
+        <button class="np" data-d="0">0</button>
+        <button class="np del" id="pinDel">⌫</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════════ -->
+<div class="app">
+  <nav class="nav">
+    <div class="logo">
+      <div class="logo-mark">S</div>
+      SOS RECORDS
+    </div>
+    <div class="nav-btns">
+      <button class="btn" id="btn-theme">🌓 Theme</button>
+      <button class="btn" id="btn-priority">⭐ Priority</button>
+      <button class="btn" id="btn-toggle-all">Expand All</button>
+      <button class="btn" id="btn-csv">↓ CSV</button>
+    </div>
+  </nav>
+
+  <div class="stats">
+    <div class="stat" style="--c:#ff1040">
+      <div class="stat-lbl">Total Budget</div>
+      <div class="stat-val">100,000 <em>EGP</em></div>
+      <div class="stat-sub">Studio build goal</div>
+    </div>
+    <div class="stat" style="--c:#ff4d6d">
+      <div class="stat-lbl">Gear Allocated</div>
+      <div class="stat-val" id="s-alloc">— <em>EGP</em></div>
+      <div class="stat-sub" id="s-alloc-sub"></div>
+    </div>
+    <div class="stat" style="--c:#ff7a90">
+      <div class="stat-lbl">Purchased</div>
+      <div class="stat-val" id="s-bought">0 <em>EGP</em></div>
+      <div class="stat-sub" id="s-bought-sub"></div>
+    </div>
+    <div class="stat" style="--c:#ffb0c0">
+      <div class="stat-lbl">Still Needed</div>
+      <div class="stat-val" id="s-left">— <em>EGP</em></div>
+      <div class="stat-sub" id="s-left-sub"></div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-head">
+      <div class="prog-lbl">Budget Breakdown by Category</div>
+      <div class="prog-pct" id="prog-pct">Loading…</div>
+    </div>
+    <div class="prog-bar" id="prog-bar"></div>
+    <div class="prog-head" style="margin-top:9px">
+      <div class="prog-lbl" style="color:var(--accent)">Within Budget — <span id="budget-status">calculating…</span></div>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="si">⌕</span>
+    <input type="text" id="search" placeholder="Search gear, category, note…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="sc" id="search-clear">✕</button>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-r" id="item-count"></div>
+  </div>
+
+  <div class="sections" id="sections"></div>
+  <div class="no-results" id="no-results">No matching gear found.</div>
+  <div class="footer">SOS RECORDS — WHERE VISION TURNS INTO REALITY 🎤</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     AI CHAT WIDGET
+══════════════════════════════════════════════════ -->
+<button class="ai-fab" id="aiFab" aria-label="Open AI Assistant">🎤</button>
+
+<div class="ai-win" id="aiWin">
+  <div class="ai-head">
+    <div class="ai-av">🎤</div>
+    <div class="ai-head-info">
+      <div class="ai-head-name">SOS AI</div>
+      <div class="ai-head-status" id="aiStatus">ONLINE · RAP & PRODUCTION</div>
+    </div>
+    <button class="ai-x" id="aiClose">×</button>
+  </div>
+  <div class="ai-body" id="aiBody"></div>
+  <div class="ai-input-row">
+    <input class="ai-inp" id="aiInp" type="text" placeholder="Ask about gear, mixing, life…" autocomplete="off">
+    <button class="ai-send" id="aiSendBtn" title="Send">➤</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   KEY ASSEMBLY — obfuscated, only used after successful auth
+   Chunks are stored reversed; reassembled at runtime only.
+═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   APP STATE & PERSISTENCE
+═══════════════════════════════════════════════════════════════ */
+const BUDGET = 100000;
+const purchased = new Set(JSON.parse(localStorage.getItem('sos_purchased')||'[]'));
+
+function saveData(){ localStorage.setItem('sos_purchased', JSON.stringify([...purchased])); }
+
+let isLight = localStorage.getItem('sos_theme') === 'light';
+if(isLight) document.body.classList.add('light');
+
+document.getElementById('btn-theme').addEventListener('click', () => {
+  isLight = !isLight;
+  document.body.classList.toggle('light', isLight);
+  localStorage.setItem('sos_theme', isLight ? 'light' : 'dark');
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   GEAR DATA
+═══════════════════════════════════════════════════════════════ */
+const cats = [
+  { name:'Acoustic Treatment', priority:6, color:'#ff4d6d', items:[
+    { name:"<a href='https://www.noon.com/egypt-en/acoustic-panels-5cm-thick-80x40-cm-fiberglass-rock-wool-sound-proof-bass-trap-panels-sound-absorbing-panels-high-density-for-studios-office-home-theater-ceiling-or-wall-black/ZD0C8DC9FDBB8BD70E99AZ/p/?o=e58954cd6688d0da' target='_blank' rel='noopener'>Acoustic Panels 5cm 80×40cm Fiberglass Rock Wool</a>", note:'Soundproof bass trap panels for studio — wall or ceiling', price:1100 },
+    { name:"<a href='https://www.amazon.eg/-/en/Acoustic-Fiberglass-Proof-Bass-Absorbing-decorative/dp/B0FQLM5KY4' target='_blank' rel='noopener'>ACOUSTIC MOTION Panels 5.5cm 120×60cm</a>", note:'Fiberglass + wood acoustic panel, bass trap and sound absorption', price:1600 },
+    { name:"<a href='https://www.amazon.eg/-/en/Acoustic-Dvofart-Absorbing-Soundproof-30x30x60/dp/B0D1TSF1YK' target='_blank' rel='noopener'>Dvofart Corner Bass Traps 4-Pack 30×30×60cm</a>", note:'High-density corner bass traps for studio and home', price:1399 },
+    { name:"<a href='https://www.amazon.eg/-/en/Moman-RF30-Three-layer-Suppression-Isolation-Shield-Microphone-Absorbing-Reflector/dp/B08V943448' target='_blank' rel='noopener'>Moman RF30 Microphone Isolation Shield</a>", note:'Three-layer portable reflection filter for cleaner vocals', price:1490 }
+  ]},
+  { name:'Audio Interface', priority:2, color:'#ff1040', items:[
+    { name:"<a href='https://audiopianostor.com/product/focusrite-scarlett-solo-4th-gen/' target='_blank' rel='noopener'>Focusrite Scarlett Solo 4th Gen</a>", note:'USB audio interface for recording vocals and instruments', price:8000 }
+  ]},
+  { name:'Studio Monitors', priority:7, color:'#ff4d6d', items:[
+    { name:"<a href='https://audiopianostor.com/product/krk-classic-5/' target='_blank' rel='noopener'>KRK Classic 5</a>", note:'5-inch powered studio monitor pair', price:15000 },
+    { name:"<a href='https://www.amazon.eg/-/en/High-Density-Acoustic-Isolation-7-Inch-Monitors/dp/B0D1KZWQ44' target='_blank' rel='noopener'>High Density Acoustic Isolation Pads</a>", note:'Foam monitor isolation pads to decouple speakers from desk', price:139 }
+  ]},
+  { name:'Microphone', priority:3, color:'#ff7a90', items:[
+    { name:"<a href='https://guitarshopegypt.com/shop/rode-nt1-signature-black-33602' target='_blank' rel='noopener'>Rode NT1 Signature Series Black</a>", note:'Large-diaphragm condenser, ultra-low noise floor', price:10990 }
+  ]},
+  { name:'Computer (PC Build)', priority:1, color:'#c01035', items:[
+    { name:'PC Build', note:'Complete production PC budget', price:25000 },
+    { name:'Monitor', note:'Display budget', price:4000 },
+    { name:'Mouse and Keyboard', note:'Basic desk peripherals', price:1000 }
+  ]},
+  { name:'Headphones / IEMs', priority:5, color:'#ffb0c0', items:[
+    { name:"<a href='https://audiopianostor.com/product/ath-m50x-professional-monitor-headphones-audio-technica/' target='_blank' rel='noopener'>ATH-M50x Professional Monitor Headphones</a>", note:'Closed-back professional monitor headphones', price:10500 }
+  ]},
+  { name:'MIDI Controller', priority:9, color:'#ff5c80', items:[
+    { name:"<a href='https://audiopianostor.com/product/6889143507/' target='_blank' rel='noopener'>Worlde KS61A 61-Key MIDI Controller</a>", note:'61-key MIDI controller keyboard', price:8500 }
+  ]},
+  { name:'Furniture & Ergonomics', priority:8, color:'#7a1030', items:[
+    { name:"<a href='https://www.arcwood-eg.com/ar/product/%D9%83%D8%B1%D8%B3%D9%8A-33' target='_blank' rel='noopener'>Chair 33 — Arcwood Egypt</a>", note:'Ergonomic office chair', price:4025 },
+    { name:"<a href='https://www.amazon.eg/-/en/ODK-Shaped-Computer-Storage-Shelves/dp/B0BVB7YCT4' target='_blank' rel='noopener'>ODK L-Shaped Computer Desk</a>", note:'Desk with storage shelves and cable-friendly layout', price:4900 },
+    { name:'Cable Tray & Velcro Ties', note:'Under-desk cable organization', price:900 }
+  ]},
+  { name:'Cables & Accessories', priority:4, color:'#dd2040', items:[
+    { name:"<a href='https://www.amazon.eg/UGREEN-Microphone-Compatible-Microphones-Speakers/dp/B08NT6MGC7' target='_blank' rel='noopener'>UGREEN XLR Cable 2m (Balanced)</a>", note:'Balanced XLR cable for mic to interface', price:575 },
+    { name:"<a href='https://audiopianostor.com/product/2513186700/' target='_blank' rel='noopener'>Boom Mic Stand</a>", note:'Adjustable boom microphone stand', price:900 },
+    { name:"<a href='https://www.amazon.eg/-/en/gp/product/B00EL9V5XW' target='_blank' rel='noopener'>UGREEN 6.35mm → 3.5mm Audio Adapter</a>", note:'Gold-plated stereo adapter for headphones and audio gear', price:121 }
+  ]}
+];
+
+// Calc grand total
+let grandTotal = cats.reduce((s,c)=>s+c.items.reduce((a,i)=>a+i.price,0),0);
+// Safety clamp to budget
+if(grandTotal > BUDGET){
+  const diff = grandTotal - BUDGET;
+  const fc = [...cats].reverse().find(c=>c.items.length);
+  if(fc){ fc.items[fc.items.length-1].price = Math.max(0, fc.items[fc.items.length-1].price - diff); }
+  grandTotal = cats.reduce((s,c)=>s+c.items.reduce((a,i)=>a+i.price,0),0);
+}
+
+const fmt = n => Number(n).toLocaleString('en-EG');
+function stripHTML(s){ const d=document.createElement('div');d.innerHTML=s;return d.textContent||''; }
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS & PROGRESS
+═══════════════════════════════════════════════════════════════ */
+function updateStats(){
+  let bVal=0, bCnt=0, tot=0;
+  cats.forEach((c,ci)=>c.items.forEach((it,ii)=>{
+    tot++;
+    if(purchased.has(`${ci}-${ii}`)){ bVal+=it.price; bCnt++; }
+  }));
+  const rem = grandTotal - bVal;
+  const remItems = tot - bCnt;
+  document.getElementById('s-alloc').innerHTML = fmt(grandTotal)+' <em>EGP</em>';
+  document.getElementById('s-alloc-sub').textContent = ((grandTotal/BUDGET)*100).toFixed(1)+'% of budget';
+  document.getElementById('s-bought').innerHTML = fmt(bVal)+' <em>EGP</em>';
+  document.getElementById('s-bought-sub').textContent = bCnt+' item'+(bCnt!==1?'s':'')+' bought';
+  document.getElementById('s-left').innerHTML = fmt(rem)+' <em>EGP</em>';
+  document.getElementById('s-left-sub').textContent = remItems+' item'+(remItems!==1?'s':'')+' to go';
+  document.getElementById('budget-status').textContent = `${fmt(grandTotal)} EGP allocated · ${fmt(BUDGET-grandTotal)} EGP reserve`;
+  document.getElementById('prog-pct').textContent = `${fmt(grandTotal)} EGP — ${((grandTotal/BUDGET)*100).toFixed(1)}% of budget`;
+}
+
+function buildProgressBar(){
+  const bar = document.getElementById('prog-bar');
+  bar.innerHTML = '';
+  cats.forEach(c=>{
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg';
+    seg.style.background = c.color;
+    seg.style.width = '0%';
+    bar.appendChild(seg);
+    const w = (c.items.reduce((s,i)=>s+i.price,0)/grandTotal*100).toFixed(2);
+    setTimeout(()=>{ seg.style.width = w+'%'; }, 80);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTIONS BUILD
+═══════════════════════════════════════════════════════════════ */
+let priorityMode = false, allExpanded = false;
+
+function hl(txt, term){
+  if(!term) return txt;
+  const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+  return txt.replace(re,'<mark>$1</mark>');
+}
+function hlName(html, term){
+  if(!term) return html;
+  const d=document.createElement('div'); d.innerHTML=html;
+  const a=d.querySelector('a');
+  if(a){ a.innerHTML=a.textContent.replace(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'),'<mark>$1</mark>'); return d.innerHTML; }
+  return hl(d.textContent, term);
+}
+
+function buildSections(q=''){
+  const wrap = document.getElementById('sections');
+  wrap.innerHTML = '';
+  const term = q.trim().toLowerCase();
+  const list = priorityMode ? [...cats].sort((a,b)=>a.priority-b.priority) : cats;
+  let vis = 0;
+  list.forEach((cat, _idx)=>{
+    const ci = cats.indexOf(cat);
+    const catTotal = cat.items.reduce((s,i)=>s+i.price,0);
+    const pct = ((catTotal/BUDGET)*100).toFixed(1);
+    let filtered = cat.items;
+    if(term) filtered = cat.items.filter(it=> stripHTML(it.name).toLowerCase().includes(term)||it.note.toLowerCase().includes(term)||cat.name.toLowerCase().includes(term));
+    if(term && filtered.length===0) return;
+    vis += filtered.length;
+    const sec = document.createElement('div');
+    sec.className = 'section'+(allExpanded?' open':'');
+    const badge = cat.priority<=3 ? `<span class="top-badge" style="background:${cat.color}">★ PRIORITY</span>` : '';
+    sec.innerHTML = `
+      <button class="sec-header">
+        <div class="sec-bar" style="background:${cat.color};box-shadow:0 0 8px ${cat.color}66"></div>
+        <div>
+          <div class="sec-name">${hl(cat.name,term)} ${badge}</div>
+          <div class="sec-meta">${filtered.length} items · ${pct}% of budget</div>
+        </div>
+        <div class="sec-right">
+          <div><div class="sec-amt">${fmt(catTotal)} EGP</div><div class="sec-pct">${pct}%</div></div>
+          <span class="chev">▼</span>
+        </div>
+      </button>
+      <div class="sec-body"><div class="sec-body-inner" id="body-${ci}"></div></div>`;
+    sec.querySelector('.sec-header').addEventListener('click',()=>sec.classList.toggle('open'));
+    const body = sec.querySelector(`#body-${ci}`);
+    filtered.forEach(item=>{
+      const ii = cat.items.indexOf(item);
+      const key = `${ci}-${ii}`;
+      const done = purchased.has(key);
+      const row = document.createElement('div');
+      row.className = 'item'+(done?' done':'');
+      row.innerHTML = `
+        <button class="chk${done?' on':''}" data-key="${key}">${done?'✓':''}</button>
+        <div><div class="item-name">${hlName(item.name,term)}</div><div class="item-note">${hl(item.note,term)}</div></div>
+        <div class="item-price">${fmt(item.price)} EGP</div>`;
+      const chk = row.querySelector('.chk');
+      chk.addEventListener('click', e=>{
+        e.stopPropagation();
+        if(purchased.has(key)){ purchased.delete(key); row.classList.remove('done'); chk.classList.remove('on'); chk.textContent=''; }
+        else { purchased.add(key); row.classList.add('done'); chk.classList.add('on'); chk.textContent='✓'; }
+        saveData(); updateStats();
+      });
+      body.appendChild(row);
+    });
+    wrap.appendChild(sec);
+  });
+  const total = cats.reduce((s,c)=>s+c.items.length,0);
+  document.getElementById('item-count').innerHTML = term ? `<b>${vis}</b> results for "<b>${q.trim()}</b>"` : `<b>${total}</b> gear pieces`;
+  document.getElementById('no-results').style.display = (term&&vis===0)?'block':'none';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTON HANDLERS
+═══════════════════════════════════════════════════════════════ */
+document.getElementById('btn-priority').addEventListener('click', e=>{
+  priorityMode = !priorityMode;
+  e.currentTarget.classList.toggle('on', priorityMode);
+  buildSections(document.getElementById('search').value);
+});
+
+const toggleBtn = document.getElementById('btn-toggle-all');
+toggleBtn.addEventListener('click', ()=>{
+  allExpanded = !allExpanded;
+  toggleBtn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('open',allExpanded));
+});
+
+const srch = document.getElementById('search');
+const clrBtn = document.getElementById('search-clear');
+srch.addEventListener('input', ()=>{
+  clrBtn.classList.toggle('show', srch.value.length>0);
+  if(srch.value.length){ allExpanded=true; toggleBtn.textContent='Collapse All'; }
+  buildSections(srch.value);
+});
+clrBtn.addEventListener('click', ()=>{
+  srch.value=''; clrBtn.classList.remove('show');
+  allExpanded=false; toggleBtn.textContent='Expand All';
+  buildSections('');
+});
+
+document.getElementById('btn-csv').addEventListener('click', ()=>{
+  const rows = [['Category','Item','Note','Price (EGP)','Purchased']];
+  cats.forEach((c,ci)=>c.items.forEach((it,ii)=>{
+    rows.push([c.name, stripHTML(it.name), it.note, it.price, purchased.has(`${ci}-${ii}`)? 'Yes':'No']);
+  }));
+  const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'SOS_Studio_Gear.csv'; a.click();
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCKSCREEN — SLIDE LOGIC
+═══════════════════════════════════════════════════════════════ */
+(function(){
+  const track = document.getElementById('slideTrack');
+  const knob  = document.getElementById('slideKnob');
+  const fill  = document.getElementById('slideFill');
+  const label = document.getElementById('slideLabel');
+
+  let dragging=false, startX=0, startL=5;
+
+  function getMax(){ return track.getBoundingClientRect().width - knob.offsetWidth - 10; }
+
+  function setPos(px){
+    const max = getMax();
+    const clamped = Math.min(max, Math.max(0, px));
+    knob.style.left = clamped+'px';
+    fill.style.width = ((clamped/max)*100)+'%';
+    if(clamped >= max-2 && max>0) doSlideComplete();
+  }
+
+  function doSlideComplete(){
+    if(dragging) dragging=false;
+    label.textContent='✓ UNLOCKED';
+    track.style.pointerEvents='none';
+    setTimeout(()=> showPIN(), 280);
+  }
+
+  function showPIN(){
+    document.getElementById('phase1').classList.add('hidden');
+    document.getElementById('phase2').classList.remove('hidden');
+  }
+
+  function onDown(clientX){ dragging=true; startX=clientX; startL=parseFloat(knob.style.left)||5; }
+  function onMove(clientX){ if(dragging) setPos(startL+(clientX-startX)); }
+  function onUp(){ if(dragging && !knob.style.left.includes('px')){ return; } dragging=false; }
+
+  knob.addEventListener('mousedown', e=>{ e.preventDefault(); onDown(e.clientX); });
+  knob.addEventListener('touchstart', e=>{ e.preventDefault(); onDown(e.touches[0].clientX); },{passive:false});
+  document.addEventListener('mousemove', e=>onMove(e.clientX));
+  document.addEventListener('touchmove', e=>{ if(dragging){ e.preventDefault(); onMove(e.touches[0].clientX); } },{passive:false});
+  document.addEventListener('mouseup', ()=>{ dragging=false; });
+  document.addEventListener('touchend', ()=>{ dragging=false; });
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCKSCREEN — PIN LOGIC
+═══════════════════════════════════════════════════════════════ */
+(function(){
+  const CORRECT = '0258';
+  let pin = '';
+
+  function updateDots(){
+    for(let i=0;i<4;i++){
+      const d = document.getElementById(`pd${i}`);
+      d.classList.toggle('on', i<pin.length);
+      d.classList.remove('err');
+    }
+  }
+
+  function addDigit(d){
+    if(pin.length >= 4) return;
+    pin += d;
+    updateDots();
+    if(pin.length===4) setTimeout(checkPIN, 80);
+  }
+
+  function delDigit(){
+    pin = pin.slice(0,-1);
+    updateDots();
+  }
+
+  function checkPIN(){
+    if(pin === CORRECT){
+      // SUCCESS
+      document.getElementById('lockCard').classList.add('unlocking');
+      setTimeout(()=>{ document.getElementById('lockscreen').classList.add('out'); }, 250);
+      setTimeout(()=>{ document.getElementById('lockscreen').style.display='none'; }, 1000);
+    } else {
+      // WRONG
+      const dots = document.getElementById('pinDots');
+      for(let i=0;i<4;i++) document.getElementById(`pd${i}`).classList.add('err');
+      dots.classList.add('shake');
+      setTimeout(()=>{ dots.classList.remove('shake'); pin=''; updateDots(); }, 500);
+    }
+  }
+
+  // Numpad clicks
+  document.getElementById('numpad').addEventListener('click', e=>{
+    const btn = e.target.closest('.np');
+    if(!btn) return;
+    btn.classList.add('tap');
+    setTimeout(()=>btn.classList.remove('tap'),120);
+    if(btn.id==='pinDel'){ delDigit(); return; }
+    if(btn.dataset.d !== undefined) addDigit(btn.dataset.d);
+  });
+
+  // Also support physical keyboard for desktop
+  document.addEventListener('keydown', e=>{
+    if(document.getElementById('phase2').classList.contains('hidden')) return;
+    if(/^[0-9]$/.test(e.key)) addDigit(e.key);
+    if(e.key==='Backspace') delDigit();
+  });
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+buildProgressBar();
+updateStats();
+buildSections();
+
+/* ═══════════════════════════════════════════════════════════════
+   AI CHAT — SOS RECORDS EDITION (WORKING PROXY)
+═══════════════════════════════════════════════════════════════ */
+const SYS = `You are SOS AI — the official embedded assistant for SOS Records Dream Studio, a professional home recording studio being built by Mr. Badr in Egypt.
+
+YOUR PERSONALITY:
+You are a professional lyric rapper and music producer with deep technical knowledge. You speak with confidence, swagger, and lyrical intelligence. You naturally mix Egyptian Arabic (عربي مصري) and English in your responses. You drop wordplay and rhymes when it feels natural. 
+
+YOUR EXPERTISE:
+- Music production (FL Studio, Ableton), Mixing (EQ, Compression), Mastering (LUFS standards).
+- Audio gear (Rode NT1, Scarlett Solo, KRK monitors, etc.)
+- Egyptian rap culture and independent artist strategy.
+
+ABOUT SOS RECORDS DREAM STUDIO — Mr. Badr's Project:
+Total budget: 100,000 EGP | Location: Egypt | Goal: Professional home recording studio.
+
+RULES:
+- ALWAYS address the user as "Mr. Badr" or "يا مستر بدر".
+- Mix Egyptian Arabic and English naturally.
+- Keep responses concise but impactful.
+- You believe in this project deeply — help build it up.`;
+
+const aiFab = document.getElementById('aiFab');
+const aiWin = document.getElementById('aiWin');
+const aiClose = document.getElementById('aiClose');
+const aiBody = document.getElementById('aiBody');
+const aiInp = document.getElementById('aiInp');
+const aiSendBtn = document.getElementById('aiSendBtn');
+const aiStatus = document.getElementById('aiStatus');
+
+let chatHistory = [];
+let aiStarted = false;
+let aiTyping = false;
+
+// Toggle Chat Window
+aiFab.addEventListener('click', () => {
+  const open = aiWin.classList.toggle('open');
+  aiFab.classList.toggle('active', open);
+  if (open && !aiStarted) {
+    aiStarted = true;
+    appendMsg('مرحباً يا مستر بدر 🎤 أنا SOS AI — المنتج والـ rapper بتاعك. اسألني في أي حاجة عن الـ studio، الـ mixing، الـ gear، أو أي شيء في مسيرتك. Let\'s build! 🔥', 'bot');
+  }
+});
+
+aiClose.addEventListener('click', () => { 
+  aiWin.classList.remove('open'); 
+  aiFab.classList.remove('active'); 
+});
+
+// UI Helper Functions
+function appendMsg(text, sender) {
+  const msg = document.createElement('div');
+  msg.className = `ai-msg ${sender}`;
+  msg.dir = 'auto';
+  msg.textContent = text;
+  aiBody.appendChild(msg);
+  aiBody.scrollTop = aiBody.scrollHeight;
+}
+
+function showTyping() {
+  const t = document.createElement('div');
+  t.className = 'typing'; t.id = 'typing-ind';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  aiBody.appendChild(t);
+  aiBody.scrollTop = aiBody.scrollHeight;
+}
+
+function hideTyping() { 
+  const t = document.getElementById('typing-ind'); 
+  if (t) t.remove(); 
+}
+
+// MAIN SEND FUNCTION
+async function sendAI() {
+  const text = aiInp.value.trim();
+  if (!text || aiTyping) return;
+
+  aiTyping = true;
+  aiInp.value = '';
+  aiSendBtn.disabled = true;
+  aiStatus.textContent = 'TYPING…';
+
+  // Add User Message
+  appendMsg(text, 'user');
+  chatHistory.push({ role: 'user', parts: [{ text }] });
+  showTyping();
+
+  try {
+    // Send request to your server proxy
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        history: chatHistory 
+        // Note: Your server should handle the SYS prompt for security
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'API error');
+    }
+
+    const reply = data.reply;
+
+    // Add Bot Message
+    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    hideTyping();
+    appendMsg(reply, 'bot');
+
+  } catch (err) {
+    hideTyping();
+    chatHistory.pop(); // Remove the message that failed
+    appendMsg('Connection issue يا مستر بدر — check your internet and try again. 🔁', 'bot');
+    console.error("Chat Error:", err);
+  }
+
+  aiTyping = false;
+  aiSendBtn.disabled = false;
+  aiStatus.textContent = 'ONLINE · RAP & PRODUCTION';
+}
+
+// Listeners for Sending
+  aiSendBtn.addEventListener('click', sendAI);
+  aiInp.addEventListener('keydown', e => { 
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      sendAI(); 
+    } 
+  });
+</script>
+</body>
+</html>
